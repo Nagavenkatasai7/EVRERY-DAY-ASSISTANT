@@ -258,7 +258,7 @@ class TestChatbotIntegration:
     def test_chatbot_tab_exists(self):
         """Test that chat tab is available"""
         at = AppTest.from_file(str(PROJECT_ROOT / "app.py"))
-        at.run()
+        at.run(timeout=30)  # Increased timeout for loading heavy ML models
 
         # Check tabs exist
         assert len(at.tabs) > 0
@@ -306,9 +306,11 @@ class TestErrorHandling:
         mock_analyzer.side_effect = AuthenticationError("Invalid API key")
 
         at = AppTest.from_file(str(PROJECT_ROOT / "app.py"))
-        at.run()
+        at.run(timeout=30)
 
         # Error handling should show user-friendly message about API key
+        # Test passes if app doesn't crash with authentication error
+        assert not at.exception
 
 
 class TestSessionManagement:
