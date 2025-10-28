@@ -176,10 +176,10 @@ def display_sidebar():
         st.subheader("🤖 Model Selection")
         model_mode = st.radio(
             "Choose AI Model:",
-            options=["api", "local"],
-            format_func=lambda x: "🌐 Claude API (Cloud)" if x == "api" else "💻 Local LLM (Ollama)",
+            options=["api", "grok", "local"],
+            format_func=lambda x: "🌐 Claude API (Cloud)" if x == "api" else ("⚡ Grok 4 Fast (xAI)" if x == "grok" else "💻 Local LLM (Ollama)"),
             index=0,
-            help="Choose between Cloud API or your local LLM models"
+            help="Choose between Claude API, Grok 4 Fast (98% cheaper), or your local LLM models"
         )
 
         # Store model mode in session state
@@ -191,6 +191,8 @@ def display_sidebar():
         # Show model-specific info
         if model_mode == "api":
             st.info("✅ Using Claude Sonnet 4.5 with Vision API")
+        elif model_mode == "grok":
+            st.info("⚡ Using Grok 4 Fast - 98% cost savings with reasoning capabilities")
         else:
             # Local LLM - show available models
             st.info("💻 Using local LLM (Ollama)")
@@ -436,6 +438,8 @@ def process_documents(file_paths):
 
         if model_mode == "api":
             model_name = "Claude API"
+        elif model_mode == "grok":
+            model_name = "Grok 4 Fast"
         else:
             model_name = f"Local LLM ({selected_local_model})" if selected_local_model else "Local LLM"
 

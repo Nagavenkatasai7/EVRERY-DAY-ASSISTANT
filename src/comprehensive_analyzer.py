@@ -40,7 +40,7 @@ class ComprehensiveAnalyzer:
         """Initialize comprehensive analyzer
 
         Args:
-            model_mode: "api" for Claude API or "local" for local LLM (defaults to settings)
+            model_mode: "api" for Claude API, "grok" for xAI Grok, or "local" for local LLM (defaults to settings)
             local_model_name: Name of local model to use (only for local mode)
         """
         try:
@@ -55,7 +55,19 @@ class ComprehensiveAnalyzer:
                 )
                 self.model = CLAUDE_MODEL
                 self.local_handler = None
+                self.grok_handler = None
                 logger.info(f"Comprehensive analyzer initialized with Claude API: {self.model}")
+
+            elif self.model_mode == "grok":
+                # Initialize Grok API handler
+                from src.grok_handler import GrokHandler
+                from config.settings import GROK_MODEL
+
+                self.grok_handler = GrokHandler()
+                self.client = None
+                self.local_handler = None
+                self.model = GROK_MODEL
+                logger.info(f"Comprehensive analyzer initialized with Grok API: {self.model}")
 
             elif self.model_mode == "local":
                 # Initialize local LLM handler with selected model
@@ -67,11 +79,12 @@ class ComprehensiveAnalyzer:
 
                 self.local_handler = LocalLLMHandler(model_name=model_to_use)
                 self.client = None
+                self.grok_handler = None
                 self.model = self.local_handler.model_name
                 logger.info(f"Comprehensive analyzer initialized with local model: {self.model}")
 
             else:
-                raise ValueError(f"Invalid model_mode: {self.model_mode}. Must be 'api' or 'local'")
+                raise ValueError(f"Invalid model_mode: {self.model_mode}. Must be 'api', 'grok', or 'local'")
 
         except Exception as e:
             logger.error(f"Failed to initialize analyzer: {str(e)}")
@@ -93,6 +106,17 @@ class ComprehensiveAnalyzer:
         # Route to local LLM if in local mode
         if self.model_mode == "local":
             return self.local_handler.make_api_call(messages, system_prompt, max_tokens)
+
+        # Route to Grok API if in grok mode
+        if self.model_mode == "grok":
+            from config.settings import GROK_MAX_TOKENS, GROK_TEMPERATURE
+            # Convert messages format and make Grok API call
+            grok_messages = [{"role": "system", "content": system_prompt}] + messages
+            return self.grok_handler.generate_response(
+                messages=grok_messages,
+                max_tokens=min(max_tokens, GROK_MAX_TOKENS),
+                temperature=GROK_TEMPERATURE
+            )
 
         # Otherwise use Claude API with prompt caching
         for attempt in range(CLAUDE_MAX_RETRIES):

@@ -23,7 +23,7 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 TEMP_DIR.mkdir(parents=True, exist_ok=True)
 
 # Model Selection Configuration
-# Options: "api" (Claude API) or "local" (Local LLM)
+# Options: "api" (Claude API), "grok" (xAI Grok API), or "local" (Local LLM)
 MODEL_MODE = os.getenv("MODEL_MODE", "api")  # Default to API mode
 
 # API Configuration (for Cloud API mode)
@@ -31,6 +31,13 @@ ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 # API key is only required if using API mode
 if MODEL_MODE == "api" and not ANTHROPIC_API_KEY:
     raise ValueError("ANTHROPIC_API_KEY required when MODEL_MODE='api'")
+
+# Grok API Configuration (for xAI Grok mode)
+# Support both XAI_API (Streamlit Cloud) and GROK_API_KEY (local) for compatibility
+GROK_API_KEY = os.getenv("XAI_API", "") or os.getenv("GROK_API_KEY", "")
+# API key is only required if using Grok mode
+if MODEL_MODE == "grok" and not GROK_API_KEY:
+    raise ValueError("XAI_API or GROK_API_KEY required when MODEL_MODE='grok'")
 
 # Tavily API Configuration (for Web Search)
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY", "")
@@ -49,6 +56,14 @@ CLAUDE_TEMPERATURE = 0.7
 CLAUDE_REQUEST_TIMEOUT = 120  # seconds
 CLAUDE_MAX_RETRIES = 3
 CLAUDE_RETRY_DELAY = 2  # seconds
+
+# Grok API Settings (for Grok mode)
+GROK_MODEL = os.getenv("GROK_MODEL", "grok-4-fast-reasoning")  # Grok 4 Fast with reasoning
+GROK_MAX_TOKENS = int(os.getenv("GROK_MAX_TOKENS", "8192"))
+GROK_TEMPERATURE = float(os.getenv("GROK_TEMPERATURE", "0.7"))
+GROK_REQUEST_TIMEOUT = int(os.getenv("GROK_REQUEST_TIMEOUT", "120"))  # seconds
+GROK_MAX_RETRIES = 3
+GROK_RETRY_DELAY = 2  # seconds
 
 # Cost Optimization Settings
 ENABLE_PROMPT_CACHING = os.getenv("ENABLE_PROMPT_CACHING", "true").lower() == "true"  # 60-70% cost savings
