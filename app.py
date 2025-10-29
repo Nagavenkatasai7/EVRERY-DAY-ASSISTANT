@@ -33,6 +33,8 @@ from src.summary_report_generator import SummaryReportGenerator
 from src.document_session import DocumentSession, SessionManager
 from src.chatbot import DocumentChatbot
 from chatbot_ui import display_chatbot_tab, save_session_after_processing
+from src.ui.social_media_ui import social_media_automation_page
+from src.ui.resume_ui import resume_maker_page
 from utils.file_utils import save_uploaded_file, cleanup_temp_files, get_file_info
 from utils.logger import get_logger
 from utils.exceptions import (
@@ -718,7 +720,7 @@ def main():
         file_paths = upload_documents()
 
         # Main content with tabs
-        tab1, tab2 = st.tabs(["📄 Process Documents", "💬 Chat with Documents"])
+        tab1, tab2, tab3, tab4 = st.tabs(["📄 Process Documents", "💬 Chat with Documents", "🚀 Social Media Automation", "📝 Resume Maker"])
 
         with tab1:
             # Process Documents workflow
@@ -764,6 +766,12 @@ def main():
 
         with tab2:
             display_chatbot_tab()
+
+        with tab3:
+            social_media_automation_page()
+
+        with tab4:
+            resume_maker_page()
 
     except Exception as e:
         st.error(f"❌ Application Error: {str(e)}")
