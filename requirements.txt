@@ -6,6 +6,7 @@ anthropic>=0.25.0
 
 # PDF Processing
 PyMuPDF>=1.23.0
+pypdf>=3.0.0
 Pillow>=10.0.0,<11.0.0
 
 # Document Analysis & RAG
