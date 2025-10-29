@@ -27,6 +27,7 @@ python-dotenv>=1.0.0
 pandas>=2.0.0
 numpy>=1.24.0,<2.0.0
 tqdm>=4.65.0
+plotly>=5.0.0
 
 # Error Tracking & Logging
 python-json-logger>=2.0.0
