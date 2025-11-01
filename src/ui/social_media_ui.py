@@ -1006,6 +1006,7 @@ def trending_topics_tab():
     with col2:
         if st.button("🔄 Refresh Trends", use_container_width=True):
             st.session_state['trends_cache'] = None
+            st.session_state['force_refresh_trends'] = True
 
     if not categories:
         st.warning("Please select at least one category.")
@@ -2413,13 +2414,21 @@ def get_analytics_data(user_id: int, start_date, end_date) -> Dict:
 def get_trending_topics(categories: List[str]) -> Dict[str, List[Dict]]:
     """Get trending topics by category"""
     try:
+        # Check if we need to fetch new trends
+        force_refresh = st.session_state.get('force_refresh_trends', False)
+
         if 'trends_cache' not in st.session_state or st.session_state.trends_cache is None:
             discovery = TrendDiscovery(db_manager=st.session_state.db_manager)
             trends = discovery.discover_weekly_trends(
                 categories=categories,
-                max_results_per_category=5
+                max_results_per_category=5,
+                force_refresh=force_refresh
             )
             st.session_state.trends_cache = trends
+
+            # Reset force_refresh flag
+            if force_refresh:
+                st.session_state['force_refresh_trends'] = False
 
         return st.session_state.trends_cache
 
