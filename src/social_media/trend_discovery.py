@@ -76,13 +76,15 @@ class TrendDiscovery:
     def discover_weekly_trends(
         self,
         categories: List[str] = None,
-        max_results_per_category: int = 5
+        max_results_per_category: int = 5,
+        force_refresh: bool = False
     ) -> Dict[str, List[Dict]]:
         """Discover trends across multiple categories
 
         Args:
             categories: List of category names (default: all)
             max_results_per_category: Max trends per category
+            force_refresh: If True, bypass cache and fetch fresh data from API
 
         Returns:
             Dict mapping category to list of trend dictionaries
@@ -103,7 +105,8 @@ class TrendDiscovery:
                     query=query,
                     category=category,
                     max_results=max_results_per_category,
-                    max_age_days=7
+                    max_age_days=7,
+                    force_refresh=force_refresh
                 )
                 category_trends.extend(trends)
 
@@ -123,7 +126,8 @@ class TrendDiscovery:
         query: str,
         category: str,
         max_results: int = 5,
-        max_age_days: int = 7
+        max_age_days: int = 7,
+        force_refresh: bool = False
     ) -> List[Dict]:
         """Search for trends using Tavily API
 
@@ -132,16 +136,20 @@ class TrendDiscovery:
             category: Trend category
             max_results: Maximum results to return
             max_age_days: Maximum age of content in days
+            force_refresh: If True, bypass cache and fetch fresh data from API
 
         Returns:
             List of trend dictionaries
         """
         try:
-            # Check cache first
-            cached_trends = self._get_cached_trends(query, max_age_days)
-            if cached_trends:
-                logger.info(f"Using {len(cached_trends)} cached trends for: {query}")
-                return cached_trends
+            # Check cache first (unless force_refresh is True)
+            if not force_refresh:
+                cached_trends = self._get_cached_trends(query, max_age_days)
+                if cached_trends:
+                    logger.info(f"Using {len(cached_trends)} cached trends for: {query}")
+                    return cached_trends
+            else:
+                logger.info(f"Force refresh - bypassing cache for: {query}")
 
             # Search Tavily
             response = self.client.search(
